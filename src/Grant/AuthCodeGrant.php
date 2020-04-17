@@ -21,7 +21,8 @@ use League\OAuth2\Server\Exception\OAuthServerException;
 use League\OAuth2\Server\Repositories\AuthCodeRepositoryInterface;
 use League\OAuth2\Server\Repositories\RefreshTokenRepositoryInterface;
 use League\OAuth2\Server\RequestEvent;
-use League\OAuth2\Server\RequestTypes\AuthorizationRequest;
+use League\OAuth2\Server\RequestTypes\AuthorizationRequestFactory;
+use League\OAuth2\Server\RequestTypes\AuthorizationRequestFactoryInterface;
 use League\OAuth2\Server\RequestTypes\AuthorizationRequestInterface;
 use League\OAuth2\Server\ResponseTypes\RedirectResponse;
 use League\OAuth2\Server\ResponseTypes\ResponseTypeInterface;
@@ -47,16 +48,18 @@ class AuthCodeGrant extends AbstractAuthorizeGrant
     private $codeChallengeVerifiers = [];
 
     /**
-     * @param AuthCodeRepositoryInterface     $authCodeRepository
-     * @param RefreshTokenRepositoryInterface $refreshTokenRepository
-     * @param DateInterval                    $authCodeTTL
+     * @param AuthCodeRepositoryInterface           $authCodeRepository
+     * @param RefreshTokenRepositoryInterface       $refreshTokenRepository
+     * @param DateInterval                          $authCodeTTL
+     * @param AuthorizationRequestFactoryInterface  $authorizationRequestFactory
      *
      * @throws Exception
      */
     public function __construct(
         AuthCodeRepositoryInterface $authCodeRepository,
         RefreshTokenRepositoryInterface $refreshTokenRepository,
-        DateInterval $authCodeTTL
+        DateInterval $authCodeTTL,
+        AuthorizationRequestFactoryInterface $authorizationRequestFactory = null
     ) {
         $this->setAuthCodeRepository($authCodeRepository);
         $this->setRefreshTokenRepository($refreshTokenRepository);
@@ -70,6 +73,11 @@ class AuthCodeGrant extends AbstractAuthorizeGrant
 
         $plainVerifier = new PlainVerifier();
         $this->codeChallengeVerifiers[$plainVerifier->getMethod()] = $plainVerifier;
+
+        if ($authorizationRequestFactory === null) {
+            $authorizationRequestFactory = new AuthorizationRequestFactory();
+        }
+        $this->setAuthorizationRequestFactory($authorizationRequestFactory);
     }
 
     /**
@@ -279,7 +287,7 @@ class AuthCodeGrant extends AbstractAuthorizeGrant
 
         $stateParameter = $this->getQueryStringParameter('state', $request);
 
-        $authorizationRequest = new AuthorizationRequest();
+        $authorizationRequest = $this->authorizationRequestFactory->createAuthorizationRequest();
         $authorizationRequest->setGrantTypeId($this->getIdentifier());
         $authorizationRequest->setClient($client);
         $authorizationRequest->setRedirectUri($redirectUri);

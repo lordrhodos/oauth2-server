@@ -18,6 +18,7 @@ use League\OAuth2\Server\CryptKeyInterface;
 use League\OAuth2\Server\Repositories\AccessTokenRepositoryInterface;
 use League\OAuth2\Server\Repositories\ClientRepositoryInterface;
 use League\OAuth2\Server\Repositories\ScopeRepositoryInterface;
+use League\OAuth2\Server\RequestTypes\AuthorizationRequestFactoryInterface;
 use League\OAuth2\Server\RequestTypes\AuthorizationRequestInterface;
 use League\OAuth2\Server\ResponseTypes\ResponseTypeInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -141,4 +142,11 @@ interface GrantTypeInterface extends EmitterAwareInterface
      * @param string|Key|null $key
      */
     public function setEncryptionKey($key = null);
+
+    /**
+     * Set the factory to create a new authorization request object.
+     *
+     * @param AuthorizationRequestFactoryInterface $authorizationRequestFactory
+     */
+    public function setAuthorizationRequestFactory(AuthorizationRequestFactoryInterface $authorizationRequestFactory);
 }

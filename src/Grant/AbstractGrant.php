@@ -31,6 +31,7 @@ use League\OAuth2\Server\Repositories\RefreshTokenRepositoryInterface;
 use League\OAuth2\Server\Repositories\ScopeRepositoryInterface;
 use League\OAuth2\Server\Repositories\UserRepositoryInterface;
 use League\OAuth2\Server\RequestEvent;
+use League\OAuth2\Server\RequestTypes\AuthorizationRequestFactoryInterface;
 use League\OAuth2\Server\RequestTypes\AuthorizationRequestInterface;
 use LogicException;
 use Psr\Http\Message\ServerRequestInterface;
@@ -595,5 +596,10 @@ abstract class AbstractGrant implements GrantTypeInterface
     public function completeAuthorizationRequest(AuthorizationRequestInterface $authorizationRequest)
     {
         throw new LogicException('This grant cannot complete an authorization request');
+    }
+
+    public function setAuthorizationRequestFactory(AuthorizationRequestFactoryInterface $authorizationRequestFactory)
+    {
+        throw new LogicException('This grant does not use an authorization request');
     }
 }

@@ -11,8 +11,15 @@
 
 namespace League\OAuth2\Server\Grant;
 
+use League\OAuth2\Server\RequestTypes\AuthorizationRequestFactoryInterface;
+
 abstract class AbstractAuthorizeGrant extends AbstractGrant
 {
+    /**
+     * @var AuthorizationRequestFactoryInterface
+     */
+    protected $authorizationRequestFactory;
+
     /**
      * @param string $uri
      * @param array  $params
@@ -25,5 +32,10 @@ abstract class AbstractAuthorizeGrant extends AbstractGrant
         $uri .= (\strstr($uri, $queryDelimiter) === false) ? $queryDelimiter : '&';
 
         return $uri . \http_build_query($params);
+    }
+
+    public function setAuthorizationRequestFactory(AuthorizationRequestFactoryInterface $authorizationRequestFactory)
+    {
+        $this->authorizationRequestFactory = $authorizationRequestFactory;
     }
 }

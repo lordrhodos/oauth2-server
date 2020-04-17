@@ -15,6 +15,8 @@ use League\OAuth2\Server\Exception\OAuthServerException;
 use League\OAuth2\Server\Repositories\RefreshTokenRepositoryInterface;
 use League\OAuth2\Server\RequestEvent;
 use League\OAuth2\Server\RequestTypes\AuthorizationRequest;
+use League\OAuth2\Server\RequestTypes\AuthorizationRequestFactory;
+use League\OAuth2\Server\RequestTypes\AuthorizationRequestFactoryInterface;
 use League\OAuth2\Server\RequestTypes\AuthorizationRequestInterface;
 use League\OAuth2\Server\ResponseTypes\RedirectResponse;
 use League\OAuth2\Server\ResponseTypes\ResponseTypeInterface;
@@ -34,13 +36,21 @@ class ImplicitGrant extends AbstractAuthorizeGrant
     private $queryDelimiter;
 
     /**
-     * @param DateInterval $accessTokenTTL
-     * @param string       $queryDelimiter
+     * @param DateInterval                          $accessTokenTTL
+     * @param string                                $queryDelimiter
+     * @param AuthorizationRequestFactoryInterface  $authorizationRequestFactory
      */
-    public function __construct(DateInterval $accessTokenTTL, $queryDelimiter = '#')
-    {
+    public function __construct(
+        DateInterval $accessTokenTTL,
+        $queryDelimiter = '#',
+        AuthorizationRequestFactoryInterface $authorizationRequestFactory = null
+    ) {
         $this->accessTokenTTL = $accessTokenTTL;
         $this->queryDelimiter = $queryDelimiter;
+        if ($authorizationRequestFactory === null) {
+            $authorizationRequestFactory = new AuthorizationRequestFactory();
+        }
+        $this->setAuthorizationRequestFactory($authorizationRequestFactory);
     }
 
     /**
@@ -148,7 +158,7 @@ class ImplicitGrant extends AbstractAuthorizeGrant
 
         $stateParameter = $this->getQueryStringParameter('state', $request);
 
-        $authorizationRequest = new AuthorizationRequest();
+        $authorizationRequest = $this->authorizationRequestFactory->createAuthorizationRequest();
         $authorizationRequest->setGrantTypeId($this->getIdentifier());
         $authorizationRequest->setClient($client);
         $authorizationRequest->setRedirectUri($redirectUri);
